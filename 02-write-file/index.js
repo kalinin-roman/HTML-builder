@@ -13,6 +13,7 @@ process.stdout.write(
 );
 
 process.stdin.on('data', (textForFile) => {
+  if (textForFile.includes('exit')) process.exit(1);
   createWriteStream.write(textForFile.toString());
   console.log('\n' + `В файл записан текст: ${textForFile}`);
 });
