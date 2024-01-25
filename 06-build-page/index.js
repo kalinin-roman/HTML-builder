@@ -73,12 +73,44 @@ async function buildPage() {
   });
 
   // копирование файлов
-  fs.mkdir(assetsFolderForTransfer, { recursive: true }, (error) => {
-    if (error) {
-      return console.error(error);
-    }
-    fsPromises.cp(assestFolder, assetsFolderForTransfer, { recursive: true });
-  });
+  // assetsFolderForTransfer - для переноса
+  // assestFolder - от куда
+  async function coppyAssest(assestFolder, assetsFolderForTransfer) {
+    fs.mkdir(assetsFolderForTransfer, { recursive: true }, (error) => {
+      if (error) {
+        return console.error(error);
+      }
+    });
+
+    fs.readdir(assestFolder, { withFileTypes: true }, (error, files) => {
+      if (error) {
+        return console.log(error);
+      } else {
+        for (let i = 0; i < files.length; i++) {
+          const secondFolderAssest = path.join(assestFolder, files[i].name);
+          const secondFolderForTransfer = path.join(
+            assetsFolderForTransfer,
+            files[i].name,
+          );
+          if (files[i].isDirectory()) {
+            coppyAssest(secondFolderAssest, secondFolderForTransfer);
+          } else {
+            fs.copyFile(
+              secondFolderAssest,
+              secondFolderForTransfer,
+              (error) => {
+                if (error) {
+                  return console.log(error);
+                }
+              },
+            );
+          }
+        }
+      }
+    });
+  }
+
+  coppyAssest(assestFolder, assetsFolderForTransfer);
 }
 
 buildPage();
